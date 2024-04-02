@@ -1,0 +1,115 @@
+version: '3.8'
+
+x-deploy: &deploy
+  deploy:
+    mode: global
+    update_config:
+      delay: 0s
+      order: stop-first
+      failure_action: continue
+    restart_policy:
+      condition: on-failure
+      delay: 5s
+      max_attempts: 5
+      window: 120s
+
+services:
+  kc:
+    <<: *deploy
+    image: ${DOCKER_REGISTRY}/${DOCKER_REPOSITORY}/kc:latest
+    hostname: "kc"
+    init: true
+    sysctls:
+      - net.ipv6.conf.all.disable_ipv6=1
+    networks:
+      - default
+      - internal_dmz
+    secrets:
+      - source: kc-site.key
+        target: "/run/secrets/${HOSTNAME}.key"
+      - source: kc-site.crt
+        target: "/run/secrets/${HOSTNAME}.crt"
+    ports:
+      - target: 8443
+        published: "${KC_HOSTNAME_PORT}"
+        protocol: tcp
+        mode: ingress
+    environment:
+      KC_DB_URL: "jdbc:postgresql://pg:5432/${KC_POSTGRES_DB}"
+      KC_HOSTNAME: "${KC_HOSTNAME}"
+      KC_DB_USERNAME: "${KC_POSTGRES_USER}"
+      KC_DB_PASSWORD: "${KC_POSTGRES_PASSWORD}"
+      KEYCLOAK_ADMIN: "${KC_ADMIN_USER}"
+      KEYCLOAK_ADMIN_PASSWORD: "${KC_ADMIN_PASS}"
+      KC_HTTPS_PORT: 8443
+      KC_HTTPS_KEY_STORE_PASSWORD: "${KC_HTTPS_KEY_STORE_PASSWORD}"
+    volumes:
+      - /dev/urandom:/dev/random:ro
+      - type: tmpfs
+        target: /dev/shm
+        tmpfs:
+          size: 134217728
+    dns:
+      - 127.0.0.11
+
+  pg:
+    <<: *deploy
+    image: postgres:17-alpine
+    hostname: "pg"
+    init: true
+    environment:
+      POSTGRES_DB: "${KC_POSTGRES_DB}"
+      POSTGRES_USER: "${KC_POSTGRES_USER}"
+      POSTGRES_PASSWORD: "${KC_POSTGRES_PASSWORD}"
+      POSTGRES_INITDB_ARGS: "--data-checksums"
+      PGDATA: "/var/lib/postgresql/data/pgdata"
+    sysctls:
+      - net.ipv6.conf.all.disable_ipv6=1
+    networks:
+      - internal_dmz
+    volumes:
+      - kc-pgdata:/var/lib/postgresql/data:rw
+      - type: tmpfs
+        target: /dev/shm
+        tmpfs:
+          size: 134217728
+    # only here to have networking/routing/gateway
+    ports:
+      - target: 4444
+        protocol: tcp
+
+networks:
+  default:
+    driver: overlay
+    attachable: true
+    driver_opts:
+      encrypted: "1"
+      gateway: 10.1.13.1
+    ipam:
+      driver: default
+      config:
+        - subnet: 10.1.13.0/24
+
+  internal_dmz:
+    driver: overlay
+    internal: true
+    attachable: true
+    driver_opts:
+      encrypted: "1"
+      gateway: 10.1.14.1
+    ipam:
+      driver: default
+      config:
+        - subnet: 10.1.14.0/24
+
+secrets:
+  kc-site.key:
+    name: "kc-site.key-$CFG_PREFIX"
+    external: true
+  kc-site.crt:
+    name: "kc-site.crt-$CFG_PREFIX"
+    external: true
+
+volumes:
+  kc-pgdata:
+    name: "kc-pgdata"

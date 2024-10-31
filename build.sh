@@ -52,9 +52,11 @@ docker buildx use $APP_NAME-builder \
 docker buildx build \
     --pull \
     --progress=plain \
-    --tag $TAG_PREFIX$APP_NAME:latest \
+    --tag local/$DOCKER_REPOSITORY/$APP_NAME:latest \
     --target kc \
-    --network=host \
     $tmp_docker_build_dir \
-    $do_push \
+    --load \
         || exit $?
+
+docker tag local/$DOCKER_REPOSITORY/$APP_NAME:latest $TAG_PREFIX$APP_NAME-kc:latest
+docker push $TAG_PREFIX$APP_NAME-kc:latest

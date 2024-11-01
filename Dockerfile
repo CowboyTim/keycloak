@@ -9,6 +9,12 @@ ADD --chown=keycloak:keycloak --chmod=644 https://repo1.maven.org/maven2/org/bou
 ADD --chown=keycloak:keycloak --chmod=644 https://repo1.maven.org/maven2/org/bouncycastle/bcutil-fips/2.0.3/bcutil-fips-2.0.3.jar         providers/bcutil-fips-2.0.3.jar
 
 FROM quay.io/keycloak/keycloak:latest AS kc
+LABEL maintainer="CowboyTim <aardbeiplantje@gmail.com>"
+LABEL org.opencontainers.image.source=https://github.com/CowboyTim/keycloak
+LABEL org.opencontainers.image.authors="CowboyTim <aardbeiplantje@gmail.com>"
+LABEL org.opencontainers.image.description="Keycloak with FIPS 140-2 compliant BouncyCastle"
+LABEL org.opencontainers.image.licenses="unlicense"
+
 COPY --from=builder /opt/keycloak/ /opt/keycloak/
 COPY --from=ubi-micro-build-cert /etc/pki /etc/pki
 COPY kc.java.security /opt/keycloak/conf

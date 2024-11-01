@@ -7,7 +7,7 @@ on:
       - '**/LICENSE'
       - '**/build.sh'
       - '**/deploy.sh'
-      - '**/setup.sh'
+      - '**/kc_cli.sh'
       - '**/kc.yml'
 
 jobs:

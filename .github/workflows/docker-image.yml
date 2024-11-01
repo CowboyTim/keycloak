@@ -1,0 +1,17 @@
+name: build docker image
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: build image
+      run: docker buildx build . --file Dockerfile --tag keycloak:$(date +%s) --tag keycloak:latest

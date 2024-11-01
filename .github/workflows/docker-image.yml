@@ -2,8 +2,13 @@ name: build docker image
 on:
   push:
     branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
+    paths-ignore:
+      - '**/README.md'
+      - '**/LICENSE'
+      - '**/build.sh'
+      - '**/deploy.sh'
+      - '**/setup.sh'
+      - '**/kc.yml'
 
 jobs:
   build:

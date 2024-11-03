@@ -45,6 +45,14 @@ docker network create \
     external_network_ipv6
 ```
 
+Add a ipv4 ingress network:
+```
+docker network create \
+    --scope=swarm \
+    --attachable=true \
+    external_network_ipv4
+```
+
 ### run deploy.sh
 ```
 export STACK_NAME=iam_kc

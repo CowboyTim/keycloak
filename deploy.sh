@@ -1,10 +1,9 @@
 #!/bin/bash 
-set -e
 export STACK_NAME=${STACK_NAME?Need STACK_NAME}
 export STACK_FILE=${STACK_FILE:-kc.yml}
 export DOCKER_REGISTRY=${DOCKER_REGISTRY?Need DOCKER_REGISTRY}
 export DOCKER_REPOSITORY=${DOCKER_REPOSITORY?Need DOCKER_REPOSITORY}
-export WORKSPACE=${WORKSPACE:-$(dirname $(readlink -f $BASH_SOURCE))}
+export WORKSPACE=${WORKSPACE:-${BASH_SOURCE%/*}}
 export CFG_PREFIX=$STACK_NAME-$(date +%s)
 
 export KC_HTTPS_SITE_KEY=${KC_HTTPS_SITE_KEY?Need HTTPS key}
@@ -18,6 +17,7 @@ export KC_HOSTNAME=${KC_HOSTNAME:-$HOSTNAME}
 
 export APP_NAME=${APP_NAME:-iam}
 
+echo $KC_HTTPS_KEY_STORE_PASSWORD
 function read_pass(){
     local nm="$1"
     local de="$2"

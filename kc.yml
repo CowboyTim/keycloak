@@ -58,9 +58,9 @@ services:
       - internal_pg
     secrets:
       - source: kc-site.key
-        target: "/run/secrets/${HOSTNAME}.key"
+        target: "/run/secrets/${KC_HOSTNAME}.key"
       - source: kc-site.crt
-        target: "/run/secrets/${HOSTNAME}.crt"
+        target: "/run/secrets/${KC_HOSTNAME}.crt"
     environment:
       KC_DB_URL: "jdbc:postgresql://pg:5432/${KC_POSTGRES_DB}"
       KC_HOSTNAME: "${KC_HOSTNAME}"
@@ -108,15 +108,7 @@ networks:
     external: true
 
   external_network_ipv4:
-    driver: overlay
-    attachable: true
-    driver_opts:
-      encrypted: "1"
-      gateway: 10.1.13.1
-    ipam:
-      driver: default
-      config:
-        - subnet: 10.1.13.0/24
+    external: true
 
   internal_pg:
     driver: overlay

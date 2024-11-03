@@ -5,7 +5,7 @@ APP_NAME=${APP_NAME:-iam}
 set -eo pipefail
 
 # where are we?
-export WORKSPACE=${BASH_SOURCE%/*}
+export WORKSPACE=${WORKSPACE:-${BASH_SOURCE%/*}}
 
 # make temp docker build dir
 tmp_docker_build_dir=$(mktemp -p /tmp -d docker_build_XXXXXX)
@@ -62,6 +62,8 @@ for t in kc proxy; do
             || exit $?
 
     # tag + push, see comment above, --push won't work with BuildKit on ipv6 local
-    docker tag local/$DOCKER_REPOSITORY/$t:latest $TAG_PREFIX/$t:latest
-    docker push $TAG_PREFIX/$t:latest
+    docker tag local/$DOCKER_REPOSITORY/$APP_NAME/$t:latest $TAG_PREFIX/$t:latest \
+        || exit $?
+    docker push $TAG_PREFIX/$t:latest \
+        || exit $?
 done

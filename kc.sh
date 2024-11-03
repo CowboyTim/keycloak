@@ -49,5 +49,7 @@ $KEYCLOAK_HOME/bin/kc.sh build
 $KEYCLOAK_HOME/bin/kc.sh show-config
 exec bash $KEYCLOAK_HOME/bin/kc.sh start \
     --optimized \
+    --spi-sticky-session-encoder-infinispan-should-attach-route=false \
+    --proxy-headers forwarded \
     --log-level=DEBUG,org.keycloak.common.crypto:TRACE,org.keycloak.crypto:TRACE \
     --verbose

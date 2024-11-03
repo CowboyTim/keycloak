@@ -1,15 +1,20 @@
-1. Introduction
+#. Introduction
 
 Keycloak with FIPS 140-2 compliant BouncyCastle docker image
 
-2. to develop:
+# Develop
 ```
 bash ./build.sh
 ```
 
-3. to deploy:
+TODO: document how to deploy/test/run the development image
 
-# make sure you can access ghcr.io/aardbeiplantje/iam/kc:latest
+# Deploy
+
+This deployment section is for deploying the image to a docker swarm. The image
+comes from the github actions built image on ghcr.io.
+
+1. make sure you can access ghcr.io/aardbeiplantje/iam/kc:latest
 
 This is done via a classic personal access token:
 ```
@@ -22,7 +27,23 @@ Now you can pull:
 docker pull ghcr.io/aardbeiplantje/iam/kc:latest
 ```
 
-# run deploy.sh
+2. generate ipv6 network
+
+Go to
+[https://simpledns.plus/private-ipv6](https://simpledns.plus/private-ipv6) and
+generate a random ipv6 address. For example: fd53:5729:c558:8d8f::/64
+
+3. add ipv6 network, docker swarm doesn't allow to generate ipv6 via stack config
+```
+docker network create \
+    --ipv6 \
+    --subnet fd53:5729:c558:8d8f::/64 \
+    --attachable=true \
+    --scope=swarm \
+    external_network_ipv6
+```
+
+4. run deploy.sh
 ```
 export STACK_NAME=iam_kc
 export KC_HTTPS_SITE_KEY=auth_kc.key

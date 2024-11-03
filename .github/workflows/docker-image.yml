@@ -25,8 +25,12 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
     - name: doing checkout
       uses: actions/checkout@v4
-    - name: build image
-      run: docker buildx build . --file Dockerfile --tag ghcr.io/${REPOSITORY}/kc:${{ github.sha }} --tag ghcr.io/${REPOSITORY}/kc:latest --platform linux/amd64 --push --progress plain
+    - name: build KeyCloak image
+      run: docker buildx build . --file Dockerfile --tag ghcr.io/${REPOSITORY}/kc:${{ github.sha }} --tag ghcr.io/${REPOSITORY}/kc:latest --platform linux/amd64 --push --progress plain --target kc
+      env:
+        REPOSITORY: ${{ github.repository }}
+    - name: build PROXY image
+      run: docker buildx build . --file Dockerfile --tag ghcr.io/${REPOSITORY}/proxy:${{ github.sha }} --tag ghcr.io/${REPOSITORY}/fg:latest --platform linux/amd64 --push --progress plain --target proxy
       env:
         REPOSITORY: ${{ github.repository }}
 

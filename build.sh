@@ -1,6 +1,6 @@
 #!/bin/bash 
 
-APP_NAME=${APP_NAME:-kc}
+APP_NAME=${APP_NAME:-iam}
 
 set -eo pipefail
 
@@ -27,34 +27,41 @@ fi
 
 TAG_PREFIX=
 if [ ! -z "$DOCKER_REGISTRY" -a ! -z "$DOCKER_REGISTRY_USER" -a ! -z "$DOCKER_REGISTRY_PASS" ]; then
-    export DOCKER_REGISTRY_PASS DOCKER_REGISTRY_USER DOCKER_REGISTRY
+    echo "doing docker login"
     printenv DOCKER_REGISTRY_PASS \
         |docker login -u $DOCKER_REGISTRY_USER $DOCKER_REGISTRY --password-stdin
     DOCKER_REPOSITORY=${DOCKER_REPOSITORY:-registry}
-    TAG_PREFIX=$DOCKER_REGISTRY/$DOCKER_REPOSITORY/
-    do_push="--push"
-    do_push="$do_push --cache-to   type=registry,ref=$TAG_PREFIX$APP_NAME-kc:buildcache,mode=max"
-    do_push="$do_push --cache-from type=registry,ref=$TAG_PREFIX$APP_NAME-kc:buildcache"
+    TAG_PREFIX=$DOCKER_REGISTRY/$DOCKER_REPOSITORY/$APP_NAME
+    export DOCKER_REGISTRY_PASS DOCKER_REGISTRY_USER DOCKER_REGISTRY DOCKER_REPOSITORY
 else
-    export DOCKER_REGISTRY=${DOCKER_REGISTRY:-local}
-    export DOCKER_REPOSITORY=${DOCKER_REPOSITORY:-registry}
-    TAG_PREFIX=${TAG_PREFIX:-${DOCKER_REGISTRY}/${DOCKER_REPOSITORY}/}
-    do_push="--load"
+    DOCKER_REGISTRY=${DOCKER_REGISTRY:-local}
+    DOCKER_REPOSITORY=${DOCKER_REPOSITORY:-registry}
+    TAG_PREFIX=$DOCKER_REGISTRY/$DOCKER_REPOSITORY/$APP_NAME
+    export DOCKER_REGISTRY_PASS DOCKER_REGISTRY_USER DOCKER_REGISTRY DOCKER_REPOSITORY
 fi
 
 export BUILDX_CONFIG=${BUILDX_CONFIG:-~/.docker/buildx}
 docker buildx use $APP_NAME-builder \
   || docker buildx create --name $APP_NAME-builder --use
 
-# build/push docker
-docker buildx build \
-    --pull \
-    --progress=plain \
-    --tag local/$DOCKER_REPOSITORY/$APP_NAME:latest \
-    --target kc \
-    $tmp_docker_build_dir \
-    --load \
-        || exit $?
+for t in kc proxy; do
+    # cache not working with ipv6 local not reachable from BuildKit
+    do_cache=
+    do_cache="$do_cache --cache-to   type=registry,ref=$TAG_PREFIX/$t:buildcache,mode=max"
+    do_cache="$do_cache --cache-from type=registry,ref=$TAG_PREFIX/$t:buildcache"
 
-docker tag local/$DOCKER_REPOSITORY/$APP_NAME:latest $TAG_PREFIX$APP_NAME-kc:latest
-docker push $TAG_PREFIX$APP_NAME-kc:latest
+    # run build
+    docker buildx build \
+        --network=host \
+        --pull \
+        --progress=plain \
+        --tag local/$DOCKER_REPOSITORY/$APP_NAME/$t:latest \
+        --target $t \
+        --load \
+        $tmp_docker_build_dir \
+            || exit $?
+
+    # tag + push, see comment above, --push won't work with BuildKit on ipv6 local
+    docker tag local/$DOCKER_REPOSITORY/$t:latest $TAG_PREFIX/$t:latest
+    docker push $TAG_PREFIX/$t:latest
+done

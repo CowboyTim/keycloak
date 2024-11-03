@@ -30,7 +30,7 @@ jobs:
       env:
         REPOSITORY: ${{ github.repository }}
     - name: build PROXY image
-      run: docker buildx build . --file Dockerfile --tag ghcr.io/${REPOSITORY}/proxy:${{ github.sha }} --tag ghcr.io/${REPOSITORY}/fg:latest --platform linux/amd64 --push --progress plain --target proxy
+      run: docker buildx build . --file Dockerfile --tag ghcr.io/${REPOSITORY}/proxy:${{ github.sha }} --tag ghcr.io/${REPOSITORY}/proxy:latest --platform linux/amd64 --push --progress plain --target proxy
       env:
         REPOSITORY: ${{ github.repository }}
 

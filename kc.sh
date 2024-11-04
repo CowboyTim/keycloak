@@ -23,6 +23,14 @@ export KC_HOSTNAME_STRICT_HTTPS=${KC_HOSTNAME_STRICT_HTTPS:-false}
 export KC_FEATURES=${KC_FEATURES:-token-exchange,fips,kerberos,preview,authorization,impersonation,web-authn,oid4vc-vci,admin,admin-api,organization,recovery-codes,persistent-user-sessions,client-secret-rotation,docker,admin-fine-grained-authz,scripts,step-up-authentication,token-exchange,transient-users,update-email,web-authn}
 export KC_TRANSACTION_XA_ENABLED=${KC_TRANSACTION_XA_ENABLED:-true}
 
+# tune glibc memory allocation, optimize for low fragmentation
+# limit the number of arenas
+export MALLOC_ARENA_MAX=2
+export MALLOC_MMAP_THRESHOLD_=131072
+export MALLOC_TRIM_THRESHOLD_=131072
+export MALLOC_TOP_PAD_=131072
+export MALLOC_MMAP_MAX_=65536
+
 # bcfips
 export JAVA_OPTIONS=${JAVA_OPTS:-"-Xms256m -Xmx1024m -XX:MetaspaceSize=96M -XX:MaxMetaspaceSize=256m"}
 echo "securerandom.strongAlgorithms=PKCS11:SunPKCS11-NSS-FIPS" > /tmp/kc.keystore-create.java.security

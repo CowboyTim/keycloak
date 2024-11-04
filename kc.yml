@@ -1,7 +1,6 @@
 version: '3.8'
 
 x-deploy: &deploy
-  deploy:
     mode: global
     update_config:
       delay: 0s
@@ -12,6 +11,9 @@ x-deploy: &deploy
       delay: 5s
       max_attempts: 5
       window: 120s
+    placement:
+      constraints:
+        - node.labels.${APP_NAME}==1
 
 x-common: &common
     init: true
@@ -20,7 +22,8 @@ x-common: &common
 
 services:
   proxy:
-    <<: *deploy
+    deploy:
+      <<: *deploy
     image: ${DOCKER_REGISTRY}/${DOCKER_REPOSITORY}/${APP_NAME}/proxy:latest
     hostname: "proxy"
     networks:
@@ -48,7 +51,15 @@ services:
       NGX_APP_NAME: ${APP_NAME}
 
   kc:
-    <<: *deploy
+    deploy:
+      <<: *deploy
+      resources:
+        limits:
+          cpus: "0.8"
+          memory: 1024M
+        reservations:
+          cpus: "0.1"
+          memory: 128M
     <<: *common
     image: ${DOCKER_REGISTRY}/${DOCKER_REPOSITORY}/${APP_NAME}/kc:latest
     hostname: "kc"
@@ -81,7 +92,8 @@ services:
       - 127.0.0.11
 
   pg:
-    <<: *deploy
+    deploy:
+      <<: *deploy
     <<: *common
     image: postgres:17-alpine
     hostname: "pg"

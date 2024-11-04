@@ -25,7 +25,7 @@ export KC_TRANSACTION_XA_ENABLED=${KC_TRANSACTION_XA_ENABLED:-true}
 
 # bcfips
 echo "securerandom.strongAlgorithms=PKCS11:SunPKCS11-NSS-FIPS" > /tmp/kc.keystore-create.java.security
-_JAVA_OPTIONS="-Djava.security.properties=/tmp/kc.keystore-create.java.security -Djava.security.egd=file:/dev/urandom" \
+_JAVA_OPTIONS="-Djava.security.properties=/tmp/kc.keystore-create.java.security -Djava.security.egd=file:/dev/urandom -Xms128m -Xmx512m" \
 export _JAVA_OPTIONS
 keytool \
     -genkeypair \

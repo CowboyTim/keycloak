@@ -9,13 +9,7 @@ on:
       - 'nginx.conf'
       - '.github/workflows/docker-image.yml'
       - '.dockerignore'
-    paths-ignore:
-      - '**/README.md'
-      - '**/LICENSE'
-      - '**/build.sh'
-      - '**/deploy.sh'
-      - '**/kc_cli.sh'
-      - '**/kc.yml'
+      - '!**/README.md'
 
 jobs:
   build:

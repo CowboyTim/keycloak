@@ -2,10 +2,10 @@
 
 KC_ADMIN_USER=${KC_ADMIN_USER:-kcadmin}
 KC_ADMIN_PASS=${KC_ADMIN_PASS?Need KC_ADMIN_PASS}
-KC_HOSTNAME_PORT=${KC_HOSTNAME_PORT:-4433}
+KC_HOSTNAME_PORT=${KC_HOSTNAME_PORT:-8443}
 KC_HOSTNAME=${KC_HOSTNAME:-$HOSTNAME}
 
-KC_BASE=https://$KC_HOSTNAME:$KC_HOSTNAME_PORT/
+KC_BASE=https://$KC_HOSTNAME:$KC_HOSTNAME_PORT
 
 function login(){
     curl -qsSLak --fail-with-body ${KC_BASE}/realms/master/protocol/openid-connect/token \

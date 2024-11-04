@@ -2,6 +2,13 @@ name: build docker image
 on:
   push:
     branches: [ "main" ]
+    paths:
+      - 'Dockerfile'
+      - 'kc.sh'
+      - 'kc.java.security'
+      - 'nginx.conf'
+      - '.github/workflows/docker-image.yml'
+      - '.dockerignore'
     paths-ignore:
       - '**/README.md'
       - '**/LICENSE'

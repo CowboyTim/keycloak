@@ -8,12 +8,12 @@ KC_HOSTNAME=${KC_HOSTNAME:-$HOSTNAME}
 KC_BASE=https://$KC_HOSTNAME:$KC_HOSTNAME_PORT
 
 function login(){
-    curl -qsSLak --fail-with-body ${KC_BASE}/realms/master/protocol/openid-connect/token \
+    curl -qsSLk --fail-with-body ${KC_BASE}/realms/master/protocol/openid-connect/token \
         -H "Content-Type: application/x-www-form-urlencoded" \
-        -d "username=$KC_ADMIN_USER" \
-        -d "password=$KC_ADMIN_PASS" \
-        -d "client_id=admin-cli" \
-        -d "grant_type=password" \
+        --data-urlencode "username=$KC_ADMIN_USER" \
+        --data-urlencode "password=$KC_ADMIN_PASS" \
+        --data-urlencode "client_id=admin-cli" \
+        --data-urlencode "grant_type=password" \
         || return $?
 }
 
@@ -64,23 +64,31 @@ function add_client(){
 function client_description_converter(){
     local tkn=$1
     local realm=$2
+    local xmldata=$3
     curl -qsSLk --fail-with-body ${KC_BASE}/admin/realms/$realm/client-description-converter \
         -X POST \
         -H "Accept: application/json" \
         -H "Authorization: Bearer $tkn" \
         -H "Content-Type: application/xml" \
-        -d @/tmp/saml-metadata.xml \
+        -d "$xmldata" \
         || return $?
 }
 
 
 set -eu -o pipefail
-tkn=$(login|jq -r .access_token)
+login > "/tmp/kc_tkn" \
+    || exit $?
+tkn=$(jq -r .access_token < /tmp/kc_tkn)
 realm_name=$(uuidgen)
-add_realm "$tkn" '{"realm":"'"${realm_name}"'"}'
-add_client "$tkn" "${realm_name}" $(client_description_converter "$tkn" "${realm_name}")
-get_clients "$tkn" "${realm_name}"|jq -r
-
+add_realm "$tkn" '{"realm":"'"${realm_name}"'"}' \
+    || exit $?
 if [ ! -f /tmp/saml-metadata.xml ]; then
     curl -qsSLk https://signin.aws.amazon.com/static/saml-metadata.xml -o /tmp/saml-metadata.xml
 fi
+client_description_converter "$tkn" "${realm_name}" @/tmp/saml-metadata.xml \
+    > /tmp/client-description-converter.json \
+    || exit $?
+add_client "$tkn" "${realm_name}" @/tmp/client-description-converter.json \
+    || exit $?
+get_clients "$tkn" "${realm_name}"|jq -r
+

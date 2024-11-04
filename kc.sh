@@ -24,8 +24,9 @@ export KC_FEATURES=${KC_FEATURES:-token-exchange,fips,kerberos,preview,authoriza
 export KC_TRANSACTION_XA_ENABLED=${KC_TRANSACTION_XA_ENABLED:-true}
 
 # bcfips
+export JAVA_OPTIONS=${JAVA_OPTS:-"-Xms256m -Xmx1024m -XX:MetaspaceSize=96M -XX:MaxMetaspaceSize=256m"}
 echo "securerandom.strongAlgorithms=PKCS11:SunPKCS11-NSS-FIPS" > /tmp/kc.keystore-create.java.security
-_JAVA_OPTIONS="-Djava.security.properties=/tmp/kc.keystore-create.java.security -Djava.security.egd=file:/dev/urandom -Xms128m -Xmx512m" \
+_JAVA_OPTIONS="-Djava.security.properties=/tmp/kc.keystore-create.java.security -Djava.security.egd=file:/dev/urandom $JAVA_OPTIONS" \
 export _JAVA_OPTIONS
 keytool \
     -genkeypair \

@@ -70,6 +70,7 @@ services:
       KEYCLOAK_ADMIN_PASSWORD: "${KC_ADMIN_PASS}"
       KC_HTTPS_PORT: 8443
       KC_HTTPS_KEY_STORE_PASSWORD: "${KC_HTTPS_KEY_STORE_PASSWORD}"
+      JAVA_OPTIONS: "${JAVA_OPTIONS}"
     volumes:
       - /dev/urandom:/dev/random:ro
       - type: tmpfs

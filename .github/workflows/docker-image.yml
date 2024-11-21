@@ -27,11 +27,11 @@ jobs:
     - name: doing checkout
       uses: actions/checkout@v4
     - name: build KeyCloak image
-      run: docker buildx build . --file Dockerfile --tag ghcr.io/${REPOSITORY}/kc:${{ github.sha }} --tag ghcr.io/${REPOSITORY}/kc:latest --platform linux/amd64 --push --progress plain --target kc
+      run: docker buildx build . --file Dockerfile --tag ghcr.io/${REPOSITORY}/kc:${{ github.sha }} --tag ghcr.io/${REPOSITORY}/kc:latest --platform linux/amd64 --push --progress plain --target kc-runtime
       env:
         REPOSITORY: ${{ github.repository }}
     - name: build PROXY image
-      run: docker buildx build . --file Dockerfile --tag ghcr.io/${REPOSITORY}/proxy:${{ github.sha }} --tag ghcr.io/${REPOSITORY}/proxy:latest --platform linux/amd64 --push --progress plain --target proxy
+      run: docker buildx build . --file Dockerfile --tag ghcr.io/${REPOSITORY}/proxy:${{ github.sha }} --tag ghcr.io/${REPOSITORY}/proxy:latest --platform linux/amd64 --push --progress plain --target proxy-runtime
       env:
         REPOSITORY: ${{ github.repository }}
 

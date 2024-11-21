@@ -1,4 +1,4 @@
-FROM alpine:latest AS proxy
+FROM alpine:latest AS proxy-runtime
 RUN apk add --no-cache nginx nginx-mod-http-auth-jwt nginx-mod-http-headers-more nginx-mod-http-lua
 COPY ./nginx.conf /etc/nginx/nginx.conf
 RUN \
@@ -16,7 +16,7 @@ ADD --chown=keycloak:keycloak --chmod=644 https://repo1.maven.org/maven2/org/bou
 ADD --chown=keycloak:keycloak --chmod=644 https://repo1.maven.org/maven2/org/bouncycastle/bc-fips/2.0.0/bc-fips-2.0.0.jar         providers/bc-fips-2.0.0.jar
 ADD --chown=keycloak:keycloak --chmod=644 https://repo1.maven.org/maven2/org/bouncycastle/bcutil-fips/2.0.3/bcutil-fips-2.0.3.jar         providers/bcutil-fips-2.0.3.jar
 
-FROM quay.io/keycloak/keycloak:latest AS kc
+FROM quay.io/keycloak/keycloak:latest AS kc-runtime
 LABEL maintainer="CowboyTim <aardbeiplantje@gmail.com>"
 LABEL org.opencontainers.image.source=https://github.com/aardbeiplantje/iam
 LABEL org.opencontainers.image.authors="CowboyTim <aardbeiplantje@gmail.com>"
